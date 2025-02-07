@@ -1,5 +1,5 @@
 import 'package:finalpro/register.dart';
-import 'package:finalpro/train.dart';
+import 'package:finalpro/welcomepage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -25,9 +25,11 @@ class _LoginPageState extends State<LoginPage> {
 
         if (userCredential.user != null) {
           Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => WelcomePage(user: userCredential.user!)),
-          );
+  context,
+  MaterialPageRoute(
+    builder: (context) => WelcomePage(userEmail: _emailController.text),
+  ),
+);
         }
       } on FirebaseAuthException catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Login failed: ${e.message}")));
@@ -78,13 +80,13 @@ class _LoginPageState extends State<LoginPage> {
                 alignment: Alignment.topCenter,
                 child: Column(
                   children: [
-                    Text('Welcome Back 👋', style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold)),
-                    SizedBox(height: 8),
+                    Text('Welcome Back 👋', style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
+                    SizedBox(height: 4),
                     Text('Sign in to your account', style: TextStyle(fontSize: 18, color: Colors.grey[600])),
                   ],
                 ),
               ),
-              SizedBox(height: 40),
+              SizedBox(height: 20),
               // Updated text fields with icons and border radius
               _buildTextField(
                 _emailController, 
@@ -101,13 +103,13 @@ class _LoginPageState extends State<LoginPage> {
                 obscureText: true,
                 prefixIcon: Icon(Icons.lock, color: Colors.grey),
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 10),
               ElevatedButton(
                 onPressed: _login,
                 child: Text('Log in'),
                 style: ElevatedButton.styleFrom(minimumSize: Size(double.infinity, 50), backgroundColor: Color(0xFF00C779)),
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 10),
               TextButton(
                 onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => RegisterPage())),
                 child: Text("Don't have an account? Sign up"),

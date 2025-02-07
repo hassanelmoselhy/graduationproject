@@ -1,4 +1,4 @@
-import 'package:finalpro/animation.dart';
+import 'package:finalpro/Login.dart';
 import 'package:finalpro/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home:  Homepage(),
+      home:  LoginPage(),
     );
   }
 }
