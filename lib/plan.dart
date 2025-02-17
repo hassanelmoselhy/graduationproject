@@ -1,14 +1,11 @@
-import 'package:finalpro/mainscreen.dart';
+import 'package:finalpro/Time.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
+import 'package:font_awesome_flutter/font_awesome_flutter.dart'; 
 class Plan extends StatefulWidget {
   const Plan({super.key});
-
   @override
   State<Plan> createState() => _PlanState();
 }
-
 class _PlanState extends State<Plan> {
   @override
   Widget build(BuildContext context) {
@@ -51,11 +48,9 @@ class _PlanState extends State<Plan> {
     );
   }
 }
-
 class AchievementsPage extends StatelessWidget {
   static int completedExercises = 0; // عدد التمارين المكتملة
   static double score = 0; // النقاط الحالية
-
   @override
   Widget build(BuildContext context) {
     int totalExercises = 11; // عدد التمارين اليومية
@@ -251,13 +246,14 @@ class _ExercisesPageState extends State<ExercisesPage> {
               onTap: () {
                 completeExercise();
                 Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => MainScreen(),
-                      
-                
-                  )
-                );
+    context,
+    MaterialPageRoute(
+      builder: (context) => ExerciseTimerPage(
+        exerciseName: exercises[index]['name']!,
+        duration: exercises[index]['time'],
+      ),
+    ),
+  );
               },
             ),
           );
@@ -514,14 +510,15 @@ class _ExercisesPageState1 extends State<ExercisesPage1> {
               subtitle: Text('Duration: ${exercises1[index]['time']}'),
               onTap: () {
                 completeExercise1();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => MainScreen(),
-                      
-                
-                  )
-                );
+                 Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => ExerciseTimerPage(
+        exerciseName: exercises1[index]['name']!,
+        duration: exercises1[index]['time'],
+      ),
+    ),
+  );
               },
             ),
           );

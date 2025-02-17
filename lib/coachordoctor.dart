@@ -287,7 +287,7 @@ class doctorPage  extends StatefulWidget {
   @override
   _DoctorPageState createState() => _DoctorPageState();
 }
-
+ 
 class _DoctorPageState extends State<doctorPage > {
   TextEditingController searchController = TextEditingController();
   List<Map<String, dynamic>> data = [
