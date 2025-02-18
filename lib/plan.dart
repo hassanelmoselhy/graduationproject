@@ -1,4 +1,4 @@
-import 'package:finalpro/Time.dart';
+import 'package:finalpro/showtraining.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart'; 
 class Plan extends StatefulWidget {
@@ -35,7 +35,7 @@ class _PlanState extends State<Plan> {
                     context,
                     MaterialPageRoute(
                         builder: (context) => ExercisesPage(
-                              totalExercises: 11, // عدد التمارين في اليوم
+                              totalExercises: 5, // عدد التمارين في اليوم
                             )),
                   );
                 },
@@ -53,7 +53,7 @@ class AchievementsPage extends StatelessWidget {
   static double score = 0; // النقاط الحالية
   @override
   Widget build(BuildContext context) {
-    int totalExercises = 11; // عدد التمارين اليومية
+    int totalExercises = 5; // عدد التمارين اليومية
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -197,30 +197,28 @@ class ExercisesPage extends StatefulWidget {
 
 class _ExercisesPageState extends State<ExercisesPage> {
   final List<Map<String, dynamic>> exercises = [
-    {'name': 'Push-up', 'time': '2m 26s', 'icon': FontAwesomeIcons.personPraying},
-    {'name': 'Plank', 'time': '1m 30s', 'icon': FontAwesomeIcons.gripLines},
-    {'name': 'Squats', 'time': '3m 10s', 'icon': FontAwesomeIcons.personArrowDownToLine},
-    {'name': 'Lunges', 'time': '2m 15s', 'icon': FontAwesomeIcons.personWalking},
-    {'name': 'Burpees', 'time': '4m', 'icon': FontAwesomeIcons.personRunning},
-    {'name': 'Mountain Climbers', 'time': '2m 45s', 'icon': FontAwesomeIcons.personHiking},
-    {'name': 'Jumping Jacks', 'time': '3m', 'icon': FontAwesomeIcons.child},
-    {'name': 'Bicep Curls', 'time': '2m', 'icon': FontAwesomeIcons.dumbbell},
-    {'name': 'Tricep Dips', 'time': '2m 20s', 'icon': FontAwesomeIcons.handHoldingHeart},
-    {'name': 'Leg Raises', 'time': '3m 5s', 'icon': FontAwesomeIcons.personBooth},
-     {'name': 'russian twists', 'time': '3m 5s', 'icon': FontAwesomeIcons.personBooth},
+    {'name': 'Push-up', 'time': '2m 26s', 'icon': FontAwesomeIcons.personPraying  , 'screen': ImageScreen(index: 0,)},
+    {'name': 'pull-up', 'time': '1m 30s', 'icon': FontAwesomeIcons.gripLines , 'screen': ImageScreen1(index: 1,)},
+    {'name': 'Squats', 'time': '3m 10s', 'icon': FontAwesomeIcons.personArrowDownToLine , 'screen': ImageScreen2(index: 2,)},
+    {'name': 'jumping-jacks', 'time': '2m 15s', 'icon': FontAwesomeIcons.personWalking , 'screen': ImageScreen3(index: 3,)},
+    {'name': 'sit-up', 'time': '4m 2s', 'icon': FontAwesomeIcons.personRunning , 'screen': ImageScreen4(index: 4,)},
+   
   ];
 
-  void completeExercise() {
-  setState(() {
-    if (AchievementsPage.completedExercises < widget.totalExercises) {
-      AchievementsPage.completedExercises++;
-    }
-    AchievementsPage.score = (AchievementsPage.completedExercises / widget.totalExercises) * 100;
-    
-    // تأكد أن النسبة لا تتجاوز 100%
-    AchievementsPage.score = AchievementsPage.score.clamp(0, 100);
-  });
-}
+  Set<String> completedExerciseNames = Set();
+
+  void completeExercise(String exerciseName) {
+    setState(() {
+      if (!completedExerciseNames.contains(exerciseName)) {
+        completedExerciseNames.add(exerciseName);
+        if (AchievementsPage.completedExercises < widget.totalExercises) {
+          AchievementsPage.completedExercises++;
+        }
+        AchievementsPage.score = (AchievementsPage.completedExercises / widget.totalExercises) * 100;
+        AchievementsPage.score = AchievementsPage.score.clamp(0, 100);
+      }
+    });
+  }
 
 
   @override
@@ -244,16 +242,13 @@ class _ExercisesPageState extends State<ExercisesPage> {
               title: Text(exercises[index]['name']!),
               subtitle: Text('Duration: ${exercises[index]['time']}'),
               onTap: () {
-                completeExercise();
-                Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => ExerciseTimerPage(
-        exerciseName: exercises[index]['name']!,
-        duration: exercises[index]['time'],
-      ),
-    ),
-  );
+                completeExercise(exercises[index]['name']!);
+               Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => exercises[index]['screen'],
+                  ),
+                );
               },
             ),
           );
@@ -462,8 +457,8 @@ class ExercisesPage1 extends StatefulWidget {
 
 class _ExercisesPageState1 extends State<ExercisesPage1> {
   final List<Map<String, dynamic>> exercises1 = [
-    {'name': 'Straight leg raise', 'time': '2m 26s', 'icon': FontAwesomeIcons.personPraying},
-    {'name': 'Bridging', 'time': '1m 30s', 'icon': FontAwesomeIcons.gripLines},
+    {'name': 'Straight leg raise', 'time': '2m 26s', 'icon': FontAwesomeIcons.personPraying ,'screen': ImageScreen5(index: 5,)},
+    {'name': 'Bridging', 'time': '1m 30s', 'icon': FontAwesomeIcons.gripLines , 'screen': ImageScreen6(index: 6,)},
     // {'name': 'Squats', 'time': '3m 10s', 'icon': FontAwesomeIcons.personArrowDownToLine},
     // {'name': 'Lunges', 'time': '2m 15s', 'icon': FontAwesomeIcons.personWalking},
     // {'name': 'Burpees', 'time': '4m', 'icon': FontAwesomeIcons.personRunning},
@@ -474,18 +469,19 @@ class _ExercisesPageState1 extends State<ExercisesPage1> {
     // {'name': 'Leg Raises', 'time': '3m 5s', 'icon': FontAwesomeIcons.personBooth},
     //  {'name': 'russian twists', 'time': '3m 5s', 'icon': FontAwesomeIcons.personBooth},
   ];
-
-  void completeExercise1() {
-  setState(() {
-    if (AchievementsPage1.completedExercises < widget.totalExercises) {
-      AchievementsPage1.completedExercises++;
-    }
-    AchievementsPage1.score = (AchievementsPage1.completedExercises / widget.totalExercises) * 100;
-    
-    // تأكد أن النسبة لا تتجاوز 100%
-    AchievementsPage1.score = AchievementsPage1.score.clamp(0, 100);
-  });
-}
+ Set<String> completedExerciseNames1 = Set();
+void completeExercise1(String exerciseName) {
+    setState(() {
+      if (!completedExerciseNames1.contains(exerciseName)) {
+        completedExerciseNames1.add(exerciseName);
+        if (AchievementsPage1.completedExercises < widget.totalExercises) {
+          AchievementsPage1.completedExercises++;
+        }
+        AchievementsPage1.score = (AchievementsPage1.completedExercises / widget.totalExercises) * 100;
+        AchievementsPage1.score = AchievementsPage1.score.clamp(0, 100);
+      }
+    });
+  }
 
 
   @override
@@ -509,16 +505,13 @@ class _ExercisesPageState1 extends State<ExercisesPage1> {
               title: Text(exercises1[index]['name']!),
               subtitle: Text('Duration: ${exercises1[index]['time']}'),
               onTap: () {
-                completeExercise1();
-                 Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => ExerciseTimerPage(
-        exerciseName: exercises1[index]['name']!,
-        duration: exercises1[index]['time'],
-      ),
-    ),
-  );
+                completeExercise1(exercises1[index]['name']!);
+               Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => exercises1[index]['screen'],
+                  ),
+                );
               },
             ),
           );

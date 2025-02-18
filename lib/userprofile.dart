@@ -24,10 +24,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
     _loadImage(); // استرجاع الصورة عند فتح الصفحة
   }
 
-  // 🔹 تحميل الصورة المحفوظة عند فتح التطبيق
   Future<void> _loadImage() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? imagePath = prefs.getString('profile_image'); // استرجاع المسار المحفوظ
+    String? imagePath = prefs.getString('profile_image');
     if (imagePath != null && File(imagePath).existsSync()) {
       setState(() {
         _selectedImage = File(imagePath);
@@ -35,17 +34,11 @@ class _UserProfilePageState extends State<UserProfilePage> {
     }
   }
 
-  // 🔹 اختيار صورة وحفظها بشكل دائم
   Future<void> _pickImage() async {
     final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
-
     if (pickedFile != null) {
       File imageFile = File(pickedFile.path);
-
-      // حفظ الصورة في مجلد دائم داخل التطبيق
       String savedImagePath = await _saveImageToAppDirectory(imageFile);
-
-      // تخزين المسار في SharedPreferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('profile_image', savedImagePath);
 
@@ -55,11 +48,10 @@ class _UserProfilePageState extends State<UserProfilePage> {
     }
   }
 
-  // 🔹 حفظ الصورة في التخزين الدائم
   Future<String> _saveImageToAppDirectory(File imageFile) async {
-    final directory = await getApplicationDocumentsDirectory(); // مجلد التطبيق الدائم
-    final String newPath = '${directory.path}/profile_picture.png'; // تحديد اسم للصورة
-    await imageFile.copy(newPath); // نسخ الصورة إلى المجلد
+    final directory = await getApplicationDocumentsDirectory();
+    final String newPath = '${directory.path}/profile_picture.png';
+    await imageFile.copy(newPath);
     return newPath;
   }
 
@@ -67,14 +59,26 @@ class _UserProfilePageState extends State<UserProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'User Profile',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
+        title: Row(
+          children: [
+            Icon(Icons.account_circle, size: 28),
+            SizedBox(width: 8),
+            Text('User Profile', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22)),
+          ],
         ),
         backgroundColor: Colors.green[700],
         centerTitle: true,
-        elevation: 4,
+        elevation: 6,
         shadowColor: Colors.black45,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.green.shade300, Colors.green.shade700],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -90,27 +94,26 @@ class _UserProfilePageState extends State<UserProfilePage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // 🎭 صورة الملف الشخصي - زر لاختيار صورة
                 GestureDetector(
-                  onTap: _pickImage, // عند الضغط يفتح معرض الصور
+                  onTap: _pickImage,
                   child: Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          blurRadius: 10,
-                          spreadRadius: 2,
+                          color: Colors.black.withOpacity(0.3),
+                          blurRadius: 12,
+                          spreadRadius: 3,
                           offset: Offset(0, 4),
                         ),
                       ],
                     ),
                     child: CircleAvatar(
-                      radius: 55,
+                      radius: 60,
                       backgroundColor: Colors.white,
                       child: _selectedImage == null
                           ? CircleAvatar(
-                              radius: 90,
+                              radius: 80,
                               backgroundColor: Colors.green[700],
                               child: Icon(
                                 Icons.person,
@@ -119,24 +122,22 @@ class _UserProfilePageState extends State<UserProfilePage> {
                               ),
                             )
                           : CircleAvatar(
-                              radius: 50,
-                              backgroundImage: FileImage(_selectedImage!), // عرض الصورة المختارة
+                              radius: 60,
+                              backgroundImage: FileImage(_selectedImage!),
                             ),
                     ),
                   ),
                 ),
-                SizedBox(height: 25),
-
-                // 📜 كارد معلومات المستخدم
+                SizedBox(height: 30),
                 Card(
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(18),
                   ),
-                  elevation: 8,
-                  shadowColor: Colors.black45,
+                  elevation: 10,
+                  shadowColor: Colors.black.withOpacity(0.2),
                   color: Colors.white.withOpacity(0.95),
                   child: Padding(
-                    padding: const EdgeInsets.all(25.0),
+                    padding: const EdgeInsets.all(30.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -146,7 +147,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
                           subtitle: widget.userEmail,
                         ),
                         Divider(thickness: 1, color: Colors.green.shade300),
-
                         buildInfoTile(
                           icon: FontAwesomeIcons.bullseye,
                           title: 'Selected Target',
@@ -164,7 +164,6 @@ class _UserProfilePageState extends State<UserProfilePage> {
     );
   }
 
-  // 🔹 ويدجت لإعادة استخدام الـ ListTile مع تنسيق متناسق
   Widget buildInfoTile({
     required IconData icon,
     required String title,
@@ -172,12 +171,12 @@ class _UserProfilePageState extends State<UserProfilePage> {
   }) {
     return ListTile(
       leading: Container(
-        padding: EdgeInsets.all(10),
+        padding: EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.green[100],
           shape: BoxShape.circle,
         ),
-        child: FaIcon(icon, color: Colors.green[800], size: 24),
+        child: FaIcon(icon, color: Colors.green[800], size: 26),
       ),
       title: Text(
         title,
@@ -187,6 +186,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
         subtitle,
         style: TextStyle(fontSize: 16, color: Colors.grey[700]),
       ),
+      onTap: () {}, // يمكن إضافة وظيفة عند الضغط هنا
     );
   }
 }

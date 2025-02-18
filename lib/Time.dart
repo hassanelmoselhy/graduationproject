@@ -4,6 +4,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:camera/camera.dart';
 import 'package:path_provider/path_provider.dart';
 
+
 class ExerciseTimerPage extends StatefulWidget {
   final String exerciseName;
   final String duration;
@@ -12,7 +13,8 @@ class ExerciseTimerPage extends StatefulWidget {
 
   @override
   _ExerciseTimerPageState createState() => _ExerciseTimerPageState();
-}
+} 
+
 
 class _ExerciseTimerPageState extends State<ExerciseTimerPage> {
   int secondsRemaining = 0;
@@ -61,7 +63,7 @@ class _ExerciseTimerPageState extends State<ExerciseTimerPage> {
           secondsRemaining--;
         });
 
-        if (secondsRemaining == 3) {
+        if (secondsRemaining == 2) {
           playCompletionSound();
         }
       } else {
@@ -105,7 +107,7 @@ class _ExerciseTimerPageState extends State<ExerciseTimerPage> {
 
   void playCompletionSound() async {
     final player = AudioPlayer();
-    await player.play(AssetSource("audio/female-vocal-321-countdown-240912.mp3"));
+    await player.play(AssetSource("assets/audio/female-vocal-321-countdown-240912.mp3"));
   }
 
   @override
@@ -173,7 +175,7 @@ class _ExerciseTimerPageState extends State<ExerciseTimerPage> {
           Padding(
             padding: const EdgeInsets.only(bottom: 20),
             child: ElevatedButton.icon(
-              onPressed: () {
+              onPressed: () { 
                 stopRecording();
                 Navigator.pop(context);
               },
