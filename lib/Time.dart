@@ -2,8 +2,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:camera/camera.dart';
-import 'package:path_provider/path_provider.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io' ;
+import 'package:permission_handler/permission_handler.dart';
 
 class ExerciseTimerPage extends StatefulWidget {
   final String exerciseName;
@@ -13,8 +14,7 @@ class ExerciseTimerPage extends StatefulWidget {
 
   @override
   _ExerciseTimerPageState createState() => _ExerciseTimerPageState();
-} 
-
+}
 
 class _ExerciseTimerPageState extends State<ExerciseTimerPage> {
   int secondsRemaining = 0;
@@ -23,19 +23,27 @@ class _ExerciseTimerPageState extends State<ExerciseTimerPage> {
   CameraController? _cameraController;
   bool isRecording = false;
   String? videoPath;
-
+Future<void> requestPermissions() async {
+  await Permission.storage.request();
+  await Permission.manageExternalStorage.request();
+  await Permission.camera.request();
+  await Permission.microphone.request();
+  await Permission.storage.request();
+}
   @override
   void initState() {
     super.initState();
     secondsRemaining = parseDuration(widget.duration);
-    initCamera();
-  }
+    requestPermissions();
+    initCamera(); 
+    
+  } 
 
   Future<void> initCamera() async {
     final cameras = await availableCameras();
     final frontCamera = cameras.firstWhere(
       (camera) => camera.lensDirection == CameraLensDirection.front,
-      orElse: () => cameras.first, 
+      orElse: () => cameras.first,
     );
 
     _cameraController = CameraController(frontCamera, ResolutionPreset.medium);
@@ -44,7 +52,7 @@ class _ExerciseTimerPageState extends State<ExerciseTimerPage> {
     startRecording();
     startTimer();
   }
-  
+
   int parseDuration(String duration) {
     RegExp regex = RegExp(r'(\d+)m (\d+)s');
     Match? match = regex.firstMatch(duration);
@@ -72,42 +80,74 @@ class _ExerciseTimerPageState extends State<ExerciseTimerPage> {
       }
     });
   }
+  
 
-  Future<void> startRecording() async {
-    if (_cameraController == null || !_cameraController!.value.isInitialized) {
-      return;
-    }
-    final directory = await getTemporaryDirectory();
-    final path = '${directory.path}/exercise_video.mp4';
+Future<void> startRecording() async {
+  if (_cameraController == null || !_cameraController!.value.isInitialized) return;
 
-    try {
-      await _cameraController!.startVideoRecording();
-      setState(() {
-        isRecording = true;
-        videoPath = path;
-      });
-    } catch (e) {
-      print("خطأ في تسجيل الفيديو: $e");
-    }
+  // 🔹 طلب الأذونات قبل بدء التسجيل
+  await requestPermissions();
+
+  // 🔹 الحصول على مسار التخزين
+  final directory = Directory('/storage/emulated/0/DCIM/MyAppVideos');
+
+  if (!directory.existsSync()) {
+    directory.createSync(recursive: true);
   }
 
-  Future<void> stopRecording() async {
-    if (_cameraController == null || !_cameraController!.value.isRecordingVideo) {
-      return;
-    }
-    try {
-      await _cameraController!.stopVideoRecording();
-      setState(() {
-        isRecording = false;
-      });
-    } catch (e) {
-      print("خطأ في إيقاف التسجيل: $e");
-    }
+  // 🔹 تحديد اسم الملف
+  final filePath = '${directory.path}/${DateTime.now().millisecondsSinceEpoch}.mp4';
+
+  // 🔹 بدء التسجيل
+  await _cameraController!.startVideoRecording();
+  
+  setState(() {
+    isRecording = true;
+    videoPath = filePath;
+  });
+
+  print("📁 سيتم حفظ الفيديو في: $filePath");
+}
+
+Future<void> stopRecording() async {
+  if (_cameraController == null || !_cameraController!.value.isRecordingVideo) return;
+
+  // 🔹 إيقاف التسجيل
+  final videoFile = await _cameraController!.stopVideoRecording();
+
+  // 🔹 نقل الفيديو إلى المسار الصحيح
+  final savedVideo = File(videoFile.path);
+  final newVideoPath = File(videoPath!);
+  savedVideo.renameSync(newVideoPath.path);
+
+  setState(() {
+    isRecording = false;
+    videoPath = newVideoPath.path;
+  });
+
+  print("✅ تم حفظ الفيديو في: $videoPath");
+
+  // 🔹 حفظ الفيديو في المعرض باستخدام `gallery_saver_plus`
+  
+}
+ Future<void> updateAchievements() async {
+  final prefs = await SharedPreferences.getInstance();
+  String? email = prefs.getString('userEmail'); // استرجاع البريد الإلكتروني
+
+  if (email != null) {
+    int completedExercises = prefs.getInt('${email}_completedExercises') ?? 0;
+    double score = prefs.getDouble('${email}_score') ?? 0;
+
+    completedExercises++;
+    score += 20;
+
+    await prefs.setInt('${email}_completedExercises', completedExercises);
+    await prefs.setDouble('${email}_score', score);
   }
+}
 
   void playCompletionSound() async {
-    final player = AudioPlayer();
-    await player.play(AssetSource("assets/audio/female-vocal-321-countdown-240912.mp3"));
+    await player.play(AssetSource("audio/female-vocal-321-countdown-240912.mp3"));
   }
 
   @override
@@ -120,76 +160,43 @@ class _ExerciseTimerPageState extends State<ExerciseTimerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[900],
       appBar: AppBar(
+        backgroundColor: Colors.black,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(widget.exerciseName, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.deepPurple,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                "${(secondsRemaining ~/ 60).toString().padLeft(2, '0')}:${(secondsRemaining % 60).toString().padLeft(2, '0')}",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-              ),
-            ),
+            Text(widget.exerciseName, style: TextStyle(color: Colors.white, fontSize: 18)),
+            Text("$secondsRemaining ثانية", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
           ],
         ),
-        centerTitle: false,
-        backgroundColor: Colors.deepPurple,
       ),
+      backgroundColor: Colors.grey[900],
       body: Column(
         children: [
           Expanded(
-            child: _cameraController != null && _cameraController!.value.isInitialized
-                ? Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
-                          blurRadius: 10,
-                          offset: Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+              child: _cameraController != null && _cameraController!.value.isInitialized
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
                       child: AspectRatio(
                         aspectRatio: _cameraController!.value.aspectRatio,
                         child: CameraPreview(_cameraController!),
                       ),
-                    ),
-                  )
-                : Center(child: CircularProgressIndicator(color: Colors.deepPurple)),
-          ),
-
-          SizedBox(height: 20),
-
-          // زر إنهاء التمرين
-          Padding(
-            padding: const EdgeInsets.only(bottom: 20),
-            child: ElevatedButton.icon(
-              onPressed: () { 
-                stopRecording();
-                Navigator.pop(context);
-              },
-              icon: Icon(Icons.stop_circle, size: 32),
-              label: Text("إنهاء التمرين", style: TextStyle(fontSize: 24)),
-              style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(vertical: 16, horizontal: 40),
-                backgroundColor: Colors.redAccent,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                shadowColor: Colors.red.withOpacity(0.3),
-                elevation: 8,
-              ),
+                    )
+                  : Center(child: CircularProgressIndicator()),
             ),
           ),
+          SizedBox(height: 16),
+          IconButton(
+            onPressed: () async {
+              await stopRecording();
+              await updateAchievements();
+              Navigator.pop(context);
+            },
+            icon: Icon(Icons.stop_circle, color: Colors.red, size: 80),
+          ),
+          SizedBox(height: 32),
         ],
       ),
     );

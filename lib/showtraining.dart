@@ -177,7 +177,7 @@ class ImageScreen5 extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Sphinx sit-Up'),
+        title: Text('Straight leg raise'),
         backgroundColor: Colors.blueAccent,
       ),
       body: Center(
@@ -208,7 +208,7 @@ class ImageScreen6 extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Sphinx sit-Up'),
+        title: Text('bridging'),
         backgroundColor: Colors.blueAccent,
       ),
       body: Center(

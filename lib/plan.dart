@@ -1,6 +1,7 @@
 import 'package:finalpro/showtraining.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart'; 
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';  
+import 'package:shared_preferences/shared_preferences.dart'; 
 class Plan extends StatefulWidget {
   const Plan({super.key});
   @override
@@ -48,12 +49,47 @@ class _PlanState extends State<Plan> {
     );
   }
 }
-class AchievementsPage extends StatelessWidget {
-  static int completedExercises = 0; // عدد التمارين المكتملة
-  static double score = 0; // النقاط الحالية
+class AchievementsPage extends StatefulWidget {
+  @override
+  _AchievementsPageState createState() => _AchievementsPageState();
+}
+
+class _AchievementsPageState extends State<AchievementsPage> {
+  int completedExercises = 0;
+  double score = 0;
+  int totalExercises = 5; // عدد التمارين اليومية
+
+  @override
+  void initState() {
+    super.initState();
+    loadAchievements();
+  }
+
+ Future<void> loadAchievements() async {
+  final prefs = await SharedPreferences.getInstance();
+  String? email = prefs.getString('userEmail'); // استرجاع البريد الإلكتروني الحالي
+
+  if (email != null) {
+    setState(() {
+      completedExercises = prefs.getInt('${email}_completedExercises') ?? 0;
+      score = prefs.getDouble('${email}_score') ?? 0;
+    });
+  }
+}
+Future<void> saveAchievements() async {
+  final prefs = await SharedPreferences.getInstance();
+  String? email = prefs.getString('userEmail');
+
+  if (email != null) {
+    await prefs.setInt('${email}_completedExercises', completedExercises);
+    await prefs.setDouble('${email}_score', score);
+  }
+}
+
+
+
   @override
   Widget build(BuildContext context) {
-    int totalExercises = 5; // عدد التمارين اليومية
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -186,6 +222,7 @@ class AchievementsPage extends StatelessWidget {
   }
 }
 
+
 class ExercisesPage extends StatefulWidget {
   final int totalExercises;
 
@@ -205,21 +242,8 @@ class _ExercisesPageState extends State<ExercisesPage> {
    
   ];
 
-  Set<String> completedExerciseNames = Set();
 
-  void completeExercise(String exerciseName) {
-    setState(() {
-      if (!completedExerciseNames.contains(exerciseName)) {
-        completedExerciseNames.add(exerciseName);
-        if (AchievementsPage.completedExercises < widget.totalExercises) {
-          AchievementsPage.completedExercises++;
-        }
-        AchievementsPage.score = (AchievementsPage.completedExercises / widget.totalExercises) * 100;
-        AchievementsPage.score = AchievementsPage.score.clamp(0, 100);
-      }
-    });
-  }
-
+ 
 
   @override
   Widget build(BuildContext context) {
@@ -242,7 +266,6 @@ class _ExercisesPageState extends State<ExercisesPage> {
               title: Text(exercises[index]['name']!),
               subtitle: Text('Duration: ${exercises[index]['time']}'),
               onTap: () {
-                completeExercise(exercises[index]['name']!);
                Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -307,13 +330,48 @@ class _PlanState1 extends State<Plan1> {
   }
 }
 
-class AchievementsPage1 extends StatelessWidget {
-  static int completedExercises = 0; // عدد التمارين المكتملة
-  static double score = 0; // النقاط الحالية
+
+
+class AchievementsPage1 extends StatefulWidget {
+  @override
+  _AchievementsPageState1 createState() => _AchievementsPageState1();
+}
+
+class _AchievementsPageState1 extends State<AchievementsPage1> {
+  int completedExercises = 0;
+  double score = 0;
+  int totalExercises = 2; // عدد التمارين اليومية
+
+  @override
+  void initState() {
+    super.initState();
+    loadAchievements();
+  }
+
+  Future<void> loadAchievements() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      completedExercises = prefs.getInt('completedExercises') ?? 0;
+      score = (completedExercises / totalExercises) * 100; // حساب النسبة المئوية
+    });
+  }
+
+  Future<void> completeExercise() async {
+    final prefs = await SharedPreferences.getInstance();
+    
+    setState(() {
+      if (completedExercises < totalExercises) {
+        completedExercises++;
+        score = (completedExercises / totalExercises) * 100;
+      }
+    });
+
+    await prefs.setInt('completedExercises', completedExercises);
+    await prefs.setDouble('score', score);
+  }
 
   @override
   Widget build(BuildContext context) {
-    int totalExercises = 2; // عدد التمارين اليومية
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -372,7 +430,7 @@ class AchievementsPage1 extends StatelessWidget {
                     ),
                     child: Center(
                       child: Text(
-                        '${score.toInt()}%',
+                        '${score.toInt()}%', // عرض النسبة المئوية
                         style: TextStyle(
                           fontSize: 40,
                           fontWeight: FontWeight.bold,
@@ -395,7 +453,7 @@ class AchievementsPage1 extends StatelessWidget {
                         width: 100,
                         height: 100,
                         child: CircularProgressIndicator(
-                          value: completedExercises / totalExercises,
+                          value: score / 100, // تحويل النسبة المئوية إلى قيمة بين 0 و 1
                           strokeWidth: 11,
                           backgroundColor: Colors.grey.shade300,
                           valueColor:
@@ -438,6 +496,17 @@ class AchievementsPage1 extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
+              SizedBox(height: 20),
+              // زر إنهاء التمرين
+              ElevatedButton(
+                onPressed: completeExercise,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                child: Text("Complete Exercise"),
+              ),
             ],
           ),
         ),
@@ -445,7 +514,6 @@ class AchievementsPage1 extends StatelessWidget {
     );
   }
 }
-
 class ExercisesPage1 extends StatefulWidget {
   final int totalExercises;
 
@@ -469,20 +537,7 @@ class _ExercisesPageState1 extends State<ExercisesPage1> {
     // {'name': 'Leg Raises', 'time': '3m 5s', 'icon': FontAwesomeIcons.personBooth},
     //  {'name': 'russian twists', 'time': '3m 5s', 'icon': FontAwesomeIcons.personBooth},
   ];
- Set<String> completedExerciseNames1 = Set();
-void completeExercise1(String exerciseName) {
-    setState(() {
-      if (!completedExerciseNames1.contains(exerciseName)) {
-        completedExerciseNames1.add(exerciseName);
-        if (AchievementsPage1.completedExercises < widget.totalExercises) {
-          AchievementsPage1.completedExercises++;
-        }
-        AchievementsPage1.score = (AchievementsPage1.completedExercises / widget.totalExercises) * 100;
-        AchievementsPage1.score = AchievementsPage1.score.clamp(0, 100);
-      }
-    });
-  }
-
+ 
 
   @override
   Widget build(BuildContext context) {
@@ -505,7 +560,6 @@ void completeExercise1(String exerciseName) {
               title: Text(exercises1[index]['name']!),
               subtitle: Text('Duration: ${exercises1[index]['time']}'),
               onTap: () {
-                completeExercise1(exercises1[index]['name']!);
                Navigator.push(
                   context,
                   MaterialPageRoute(

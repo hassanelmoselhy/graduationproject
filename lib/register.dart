@@ -2,6 +2,7 @@ import 'package:finalpro/welcomepage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RegisterPage extends StatefulWidget {
   @override
@@ -14,8 +15,13 @@ class _RegisterPageState extends State<RegisterPage> {
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
-
   final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  // دالة لحفظ البريد الإلكتروني في SharedPreferences
+  Future<void> _saveUserEmail(String email) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('userEmail', email);
+  }
 
   // دالة التسجيل
   Future<void> _register() async {
@@ -34,13 +40,17 @@ class _RegisterPageState extends State<RegisterPage> {
             'email': _emailController.text,
           });
 
+          // حفظ البريد الإلكتروني بعد التسجيل
+          await _saveUserEmail(_emailController.text);
+
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => WelcomePage(userEmail: _emailController.text,)),
+            MaterialPageRoute(builder: (context) => WelcomePage(userEmail: _emailController.text)),
           );
         }
       } on FirebaseAuthException catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Registration failed: ${e.message}")));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("Registration failed: ${e.message}")));
       }
     }
   }
@@ -48,72 +58,70 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      resizeToAvoidBottomInset: true, // تعديل حجم الواجهة لتجنب مشاكل لوحة المفاتيح
-      body: SingleChildScrollView( // إضافة تمرير لتجنب التجاوز
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0), // تعديل الحشو
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch, // لجعل العناصر تأخذ كامل العرض
-              children: [
-                SizedBox(height: 50), // مساحة فارغة في الأعلى
-                Text(
-                  'Sign up',
-                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
+      backgroundColor: Colors.grey[100],
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.person_add, size: 80, color: Colors.teal[700]),
+              SizedBox(height: 20),
+
+              Text(
+                'Sign Up',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.teal[700],
                 ),
-                SizedBox(height: 10),
-                Text(
-                  'Create account',
-                  style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-                  textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 10),
+
+              Text(
+                'Create your account',
+                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+              ),
+              SizedBox(height: 30),
+
+              Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    _buildTextField(_nameController, 'Full Name', Icons.person),
+                    SizedBox(height: 15),
+                    _buildTextField(_phoneController, 'Phone', Icons.phone, isPhone: true),
+                    SizedBox(height: 15),
+                    _buildTextField(_emailController, 'Email', Icons.email, isEmail: true),
+                    SizedBox(height: 15),
+                    _buildTextField(_passwordController, 'Password', Icons.lock, isPassword: true),
+                  ],
                 ),
-                SizedBox(height: 20),
-                _buildTextField(_nameController, 'Name', 'Please enter your name', icon: Icons.person),
-                SizedBox(height: 15),
-                _buildTextField(
-                  _phoneController,
-                  'Phone',
-                  'Please enter your phone number',
-                  icon: Icons.phone,
-                  phoneValidator: true,
+              ),
+              SizedBox(height: 30),
+
+              ElevatedButton(
+                onPressed: _register,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal[700],
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  padding: EdgeInsets.symmetric(vertical: 16, horizontal: 50),
                 ),
-                SizedBox(height: 15),
-                _buildTextField(
-                  _emailController,
-                  'E-mail',
-                  'Please enter a valid email',
-                  icon: Icons.email,
-                  emailValidator: true,
+                child: Text(
+                  'Register',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
-                SizedBox(height: 15),
-                _buildTextField(
-                  _passwordController,
-                  'Password',
-                  'Password must be at least 6 characters',
-                  obscureText: true,
-                  icon: Icons.lock,
+              ),
+              SizedBox(height: 20),
+
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  "Already have an account? Log in",
+                  style: TextStyle(color: Colors.teal[700], fontSize: 16),
                 ),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: _register,
-                  child: Text('Register'),
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: Size(double.infinity, 50),
-                    backgroundColor: Color(0xFF00C779),
-                  ),
-                ),
-                SizedBox(height: 20),
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text("Already have an account? Log in"),
-                ),
-                SizedBox(height: 20), // لإضافة مساحة قبل نهاية الشاشة
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -123,29 +131,42 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget _buildTextField(
     TextEditingController controller,
     String label,
-    String errorMessage, {
-    bool obscureText = false,
-    bool emailValidator = false,
-    IconData? icon,
-    bool phoneValidator = false,
+    IconData icon, {
+    bool isPassword = false,
+    bool isEmail = false,
+    bool isPhone = false,
   }) {
     return TextFormField(
       controller: controller,
-      obscureText: obscureText,
+      obscureText: isPassword,
+      keyboardType: isPhone ? TextInputType.phone : TextInputType.text,
       decoration: InputDecoration(
         labelText: label,
-        prefixIcon: icon != null ? Icon(icon, color: Colors.grey) : null,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(15.0)),
+        prefixIcon: Icon(icon, color: Colors.teal[700]),
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.teal[700]!, width: 2),
+        ),
       ),
       validator: (value) {
         if (value == null || value.isEmpty) {
-          return errorMessage;
-        } else if (emailValidator && !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w]{2,4}$').hasMatch(value)) {
-          return 'Please enter a valid email';
-        } else if (obscureText && value.length < 6) {
+          return "This field can't be empty";
+        }
+        if (isEmail && !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w]{2,4}$').hasMatch(value)) {
+          return 'Enter a valid email';
+        }
+        if (isPassword && value.length < 6) {
           return 'Password must be at least 6 characters';
-        } else if (phoneValidator && value.length != 11) {
-          return 'Phone number must be exactly 11 digits';
+        }
+        if (isPhone && value.length != 11) {
+          return 'Phone number must be 11 digits';
         }
         return null;
       },
