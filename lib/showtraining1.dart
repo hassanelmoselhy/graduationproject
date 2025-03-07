@@ -1,13 +1,14 @@
 import 'package:finalpro/showtraining.dart';
+import 'package:finalpro/uploadvideo.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';  
 import 'package:shared_preferences/shared_preferences.dart'; 
-class Plan extends StatefulWidget {
-  const Plan({super.key});
+class Plane extends StatefulWidget {
+  const Plane({super.key});
   @override
-  State<Plan> createState() => _PlanState();
+  State<Plane> createState() => _PlanStat1e();
 }
-class _PlanState extends State<Plan> {
+class _PlanStat1e extends State<Plane> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,7 +25,7 @@ class _PlanState extends State<Plan> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => AchievementsPage()),
+                    MaterialPageRoute(builder: (context) => AchievementsPage3()),
                   );
                 },
                 child: Text('Go to Achievements'),
@@ -35,7 +36,7 @@ class _PlanState extends State<Plan> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => ExercisesPage(
+                        builder: (context) => ExercisesPage4(
                               totalExercises: 5, // عدد التمارين في اليوم
                             )),
                   );
@@ -49,37 +50,33 @@ class _PlanState extends State<Plan> {
     );
   }
 }
-class AchievementsPage extends StatefulWidget {
+
+
+class AchievementsPage3 extends StatefulWidget {
   @override
-  _AchievementsPageState createState() => _AchievementsPageState();
+  _AchievementsPage3State createState() => _AchievementsPage3State();
 }
 
-class _AchievementsPageState extends State<AchievementsPage> {
+class _AchievementsPage3State extends State<AchievementsPage3> {
   int completedExercises = 0;
   double score = 0;
-  int totalExercises = 5; // سيكون ديناميكيًا لاحقًا
-  bool isLoading = true;
+  int totalExercises = 5; // عدد التمارين اليومية
 
   @override
   void initState() {
     super.initState();
-    initializeAchievements();
-  }
-
-  Future<void> initializeAchievements() async {
-    await resetDailyAchievements();
-    await loadAchievements();
-    setState(() => isLoading = false);
+    loadAchievements();
   }
 
   Future<void> loadAchievements() async {
     final prefs = await SharedPreferences.getInstance();
-    String? email = prefs.getString('userEmail');
+    String? email = prefs.getString('userEmail'); // استرجاع البريد الإلكتروني الحالي
 
     if (email != null) {
-      completedExercises = prefs.getInt('${email}_completedExercises') ?? 0;
-      score = prefs.getDouble('${email}_score') ?? 0;
-      totalExercises = prefs.getInt('${email}_totalExercises') ?? 5;
+      setState(() {
+        completedExercises = prefs.getInt('${email}_completedExercises') ?? 0;
+        score = prefs.getDouble('${email}_score') ?? 0;
+      });
     }
   }
 
@@ -90,25 +87,6 @@ class _AchievementsPageState extends State<AchievementsPage> {
     if (email != null) {
       await prefs.setInt('${email}_completedExercises', completedExercises);
       await prefs.setDouble('${email}_score', score);
-      await prefs.setInt('${email}_totalExercises', totalExercises);
-    }
-  }
-
-  Future<void> resetDailyAchievements() async {
-    final prefs = await SharedPreferences.getInstance();
-    String? email = prefs.getString('userEmail');
-
-    if (email != null) {
-      String today = DateTime.now().toIso8601String().split("T")[0];
-      String? lastResetDate = prefs.getString('${email}_lastResetDate');
-
-      if (lastResetDate != today) {
-        await prefs.setInt('${email}_completedExercises', 0);
-        await prefs.setDouble('${email}_score', 0);
-        await prefs.setString('${email}_lastResetDate', today);
-        completedExercises = 0;
-        score = 0;
-      }
     }
   }
 
@@ -116,115 +94,148 @@ class _AchievementsPageState extends State<AchievementsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Achievements', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+        title: Text(
+          'Achievements',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
         backgroundColor: Colors.teal,
       ),
-      body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.teal.shade100, Colors.teal.shade300],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Achievement Circle
-                    Container(
-                      width: 220,
-                      height: 220,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(colors: [Colors.green, Colors.teal], begin: Alignment.topLeft, end: Alignment.bottomRight),
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 8, offset: Offset(0, 4)),
-                        ],
-                      ),
-                      child: Center(
-                        child: Container(
-                          width: 160,
-                          height: 160,
-                          decoration: BoxDecoration(
-                            color: Colors.orange,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 8, offset: Offset(0, 4)),
-                            ],
-                          ),
-                          child: Center(
-                            child: Text(
-                              '${score.toInt()}%',
-                              style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 32),
-                    // Circular Progress
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            SizedBox(
-                              width: 100,
-                              height: 100,
-                              child: CircularProgressIndicator(
-                                value: totalExercises > 0 ? completedExercises / totalExercises : 0,
-                                strokeWidth: 11,
-                                backgroundColor: Colors.grey.shade300,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.orange),
-                              ),
-                            ),
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  '$completedExercises/$totalExercises',
-                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.teal.shade800),
-                                ),
-                                SizedBox(height: 4),
-                                Text('Completed', style: TextStyle(fontSize: 14, color: Colors.teal.shade700)),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 32),
-                    // Motivational Text
-                    Text(
-                      'Keep pushing forward!',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500, color: Colors.teal.shade900),
-                      textAlign: TextAlign.center,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.teal.shade100, Colors.teal.shade300],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Achievement Circle
+              Container(
+                width: 220,
+                height: 220,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.green, Colors.teal],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 8,
+                      offset: Offset(0, 4),
                     ),
                   ],
                 ),
+                child: Center(
+                  child: Container(
+                    width: 160,
+                    height: 160,
+                    decoration: BoxDecoration(
+                      color: Colors.orange,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 8,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Text(
+                        '${score.toInt()}%',
+                        style: TextStyle(
+                          fontSize: 40,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ),
-            ),
+              SizedBox(height: 32),
+              // Circular Progress
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      SizedBox(
+                        width: 100,
+                        height: 100,
+                        child: CircularProgressIndicator(
+                          value: completedExercises / totalExercises,
+                          strokeWidth: 11,
+                          backgroundColor: Colors.grey.shade300,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.orange),
+                        ),
+                      ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            '$completedExercises/$totalExercises',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.teal.shade800,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'Completed',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.teal.shade700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              SizedBox(height: 32),
+              // Motivational Text
+              Text(
+                'Keep pushing forward!',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.teal.shade900,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
 
 
-class ExercisesPage extends StatefulWidget {
+
+class ExercisesPage4 extends StatefulWidget {
   final int totalExercises;
 
-  ExercisesPage({required this.totalExercises});
+  ExercisesPage4({required this.totalExercises});
 
   @override
   _ExercisesPageState createState() => _ExercisesPageState();
 }
 
-class _ExercisesPageState extends State<ExercisesPage> {
+class _ExercisesPageState extends State<ExercisesPage4> {
   final List<Map<String, dynamic>> exercises = [
     {'name': 'Push-up', 'time': '2m 26s', 'icon': FontAwesomeIcons.personPraying  , 'screen': ImageScreen(index: 0,)},
     {'name': 'pull-up', 'time': '1m 30s', 'icon': FontAwesomeIcons.gripLines , 'screen': ImageScreen1(index: 1,)},
@@ -260,8 +271,8 @@ class _ExercisesPageState extends State<ExercisesPage> {
               onTap: () {
                Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => exercises[index]['screen'],
+                  MaterialPageRoute( 
+                     builder: (context) => UploadPage(exerciseName: exercises[index]['name']),
                   ),
                 );
               },
@@ -272,14 +283,14 @@ class _ExercisesPageState extends State<ExercisesPage> {
     );
   }
 }
-class Plan1 extends StatefulWidget {
-  const Plan1({super.key});
+class Plane1 extends StatefulWidget {
+  const Plane1({super.key});
 
   @override
   _PlanState1 createState() => _PlanState1();
 }
 
-class _PlanState1 extends State<Plan1> {
+class _PlanState1 extends State<Plane1> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -296,7 +307,7 @@ class _PlanState1 extends State<Plan1> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => AchievementsPage1()),
+                    MaterialPageRoute(builder: (context) => AchievementsPage5()),
                   );
                 },
                 child: Text('Go to Achievements'),
@@ -307,7 +318,7 @@ class _PlanState1 extends State<Plan1> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => ExercisesPage1(
+                        builder: (context) => ExercisesPage6(
                               totalExercises: 2, // عدد التمارين في اليوم
                             )),
                   );
@@ -324,12 +335,12 @@ class _PlanState1 extends State<Plan1> {
 
 
 
-class AchievementsPage1 extends StatefulWidget {
+class AchievementsPage5 extends StatefulWidget {
   @override
-  _AchievementsPageState1 createState() => _AchievementsPageState1();
+  _AchievementsPageState6 createState() => _AchievementsPageState6();
 }
 
-class _AchievementsPageState1 extends State<AchievementsPage1> {
+class _AchievementsPageState6 extends State<AchievementsPage5> {
   int completedExercises = 0;
   double score = 0;
   int totalExercises = 2; // عدد التمارين اليومية
@@ -506,16 +517,16 @@ class _AchievementsPageState1 extends State<AchievementsPage1> {
     );
   }
 }
-class ExercisesPage1 extends StatefulWidget {
+class ExercisesPage6 extends StatefulWidget {
   final int totalExercises;
 
-  ExercisesPage1({required this.totalExercises});
+  ExercisesPage6({required this.totalExercises});
 
   @override
   _ExercisesPageState1 createState() => _ExercisesPageState1();
 }
 
-class _ExercisesPageState1 extends State<ExercisesPage1> {
+class _ExercisesPageState1 extends State<ExercisesPage6> {
   final List<Map<String, dynamic>> exercises1 = [
     {'name': 'Straight leg raise', 'time': '2m 26s', 'icon': FontAwesomeIcons.personPraying ,'screen': ImageScreen5(index: 5,)},
     {'name': 'Bridging', 'time': '1m 30s', 'icon': FontAwesomeIcons.gripLines , 'screen': ImageScreen6(index: 6,)},
@@ -555,7 +566,7 @@ class _ExercisesPageState1 extends State<ExercisesPage1> {
                Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => exercises1[index]['screen'],
+builder: (context) => UploadPage(exerciseName: exercises1[index]['name']) 
                   ),
                 );
               },

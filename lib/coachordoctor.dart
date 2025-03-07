@@ -1,4 +1,4 @@
-import 'package:finalpro/plan.dart';
+import 'package:finalpro/chooseuploadorlive.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -239,7 +239,7 @@ class CoachDoctorDetails extends StatelessWidget {
             radius: 40,
             backgroundImage: AssetImage('assets/images/OIP.jpg'), 
           ),
-          SizedBox(height: 8),
+          SizedBox(height: 3),
           Text(
             name,
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -252,21 +252,26 @@ class CoachDoctorDetails extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              IconButton(
-                icon: Icon(Icons.phone, color: Colors.green),
+              IconButton( 
+                padding: EdgeInsets.only(bottom: 28),
+                icon: Icon(Icons.phone, color: Colors.green
+               
+                ),
                 onPressed: () => _callPhone(phoneNumber), // إجراء اتصال
               ),
-               IconButton(
+               IconButton( 
+                  padding: EdgeInsets.only(bottom: 28),
              icon: Icon(FontAwesomeIcons.whatsapp, color: Colors.green),
               onPressed: () => _sendWhatsAppMessage(phoneNumber),
               ),
-              IconButton(
+              IconButton( 
+                  padding: EdgeInsets.only(bottom: 28),
   icon: Icon( FontAwesomeIcons.dumbbell, color: Colors.green),
   onPressed: () {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => Plan(), // Ensure 'Plan' is a defined widget
+        builder: (context) => Choose(), // Ensure 'Plan' is a defined widget
       ),
     );
   },
@@ -535,21 +540,24 @@ class CoachDoctorDetails1 extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              IconButton(
+              IconButton( 
+                  padding: EdgeInsets.only(bottom: 28),
                 icon: Icon(Icons.phone, color: Colors.green),
                 onPressed: () => _callPhone(phoneNumber), // إجراء اتصال
               ),
              IconButton(
+                padding: EdgeInsets.only(bottom: 28),
              icon: Icon(FontAwesomeIcons.whatsapp, color: Colors.green),
               onPressed: () => _sendWhatsAppMessage(phoneNumber),
               ),
              IconButton(
+                padding: EdgeInsets.only(bottom: 28),
   icon: Icon( FontAwesomeIcons.dumbbell, color: Colors.green),
   onPressed: () {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => Plan1(), // Ensure 'Plan' is a defined widget
+        builder: (context) => Choose1(), // Ensure 'Plan' is a defined widget
       ),
     );
   },

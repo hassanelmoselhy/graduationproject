@@ -32,6 +32,9 @@ dependencies:
   audioplayers: ^6.1.2
   cloud_firestore: ^5.4.5
   cupertino_icons: ^1.0.8
+  dio: ^5.8.0+1
+  dotted_border: ^2.1.0
+  file_picker: ^9.0.2
   firebase_auth: ^5.3.2
   firebase_core: ^3.7.0
   flutter:

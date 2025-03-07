@@ -42,9 +42,8 @@ Future<void> saveUserEmail(String email) async {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text("Login failed: ${e.message}")));
     }
-  }
-  }
-
+  } 
+  } 
   @override
   Widget build(BuildContext context) {
     return Scaffold(

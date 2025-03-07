@@ -1,19 +1,20 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:camera/camera.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:io' ;
+import 'package:dio/dio.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ExerciseTimerPage extends StatefulWidget {
   final String exerciseName;
   final String duration;
 
-  ExerciseTimerPage({required this.exerciseName, required this.duration});
+  const ExerciseTimerPage({Key? key, required this.exerciseName, required this.duration}) : super(key: key);
 
   @override
-  _ExerciseTimerPageState createState() => _ExerciseTimerPageState();
+  State<ExerciseTimerPage> createState() => _ExerciseTimerPageState();
 }
 
 class _ExerciseTimerPageState extends State<ExerciseTimerPage> {
@@ -22,22 +23,21 @@ class _ExerciseTimerPageState extends State<ExerciseTimerPage> {
   final player = AudioPlayer();
   CameraController? _cameraController;
   bool isRecording = false;
-  String? videoPath;
-Future<void> requestPermissions() async {
-  await Permission.storage.request();
-  await Permission.manageExternalStorage.request();
-  await Permission.camera.request();
-  await Permission.microphone.request();
-  await Permission.storage.request();
-}
+  final String serverUrl = "https://your-server.com/upload_frame"; // 🔹 عنوان الخادم لاستقبال الإطارات
+
   @override
   void initState() {
     super.initState();
     secondsRemaining = parseDuration(widget.duration);
     requestPermissions();
-    initCamera(); 
-    
-  } 
+    initCamera();
+  }
+
+  Future<void> requestPermissions() async {
+    await Permission.camera.request();
+    await Permission.microphone.request();
+    await Permission.storage.request();
+  }
 
   Future<void> initCamera() async {
     final cameras = await availableCameras();
@@ -49,7 +49,8 @@ Future<void> requestPermissions() async {
     _cameraController = CameraController(frontCamera, ResolutionPreset.medium);
     await _cameraController!.initialize();
     setState(() {});
-    startRecording();
+
+    startRecording(); // 🔹 بدء التسجيل فورًا
     startTimer();
   }
 
@@ -65,7 +66,7 @@ Future<void> requestPermissions() async {
   }
 
   void startTimer() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (secondsRemaining > 0) {
         setState(() {
           secondsRemaining--;
@@ -80,72 +81,57 @@ Future<void> requestPermissions() async {
       }
     });
   }
-  
 
-Future<void> startRecording() async {
-  if (_cameraController == null || !_cameraController!.value.isInitialized) return;
+  Future<void> startRecording() async {
+    if (_cameraController == null || !_cameraController!.value.isInitialized) return;
 
-  // 🔹 طلب الأذونات قبل بدء التسجيل
-  await requestPermissions();
-
-  // 🔹 الحصول على مسار التخزين
-  final directory = Directory('/storage/emulated/0/DCIM/MyAppVideos');
-
-  if (!directory.existsSync()) {
-    directory.createSync(recursive: true);
+    isRecording = true;
+    while (isRecording) {
+      await sendFrame();
+      await Future.delayed(const Duration(milliseconds: 300)); // 🔹 إرسال إطار كل 300 مللي ثانية
+    }
   }
 
-  // 🔹 تحديد اسم الملف
-  final filePath = '${directory.path}/${DateTime.now().millisecondsSinceEpoch}.mp4';
+  Future<void> sendFrame() async {
+    if (!isRecording || _cameraController == null) return;
 
-  // 🔹 بدء التسجيل
-  await _cameraController!.startVideoRecording();
-  
-  setState(() {
-    isRecording = true;
-    videoPath = filePath;
-  });
+    try {
+      XFile image = await _cameraController!.takePicture();
+      File file = File(image.path);
 
-  print("📁 سيتم حفظ الفيديو في: $filePath");
-}
+      FormData formData = FormData.fromMap({
+        "frame": await MultipartFile.fromFile(file.path, filename: "frame_${DateTime.now().millisecondsSinceEpoch}.jpg"),
+      });
 
-Future<void> stopRecording() async {
-  if (_cameraController == null || !_cameraController!.value.isRecordingVideo) return;
+      Dio dio = Dio();
+      await dio.post(serverUrl, data: formData);
+      debugPrint("📤 تم إرسال إطار إلى الخادم");
+    } catch (e) {
+      debugPrint("❌ خطأ أثناء إرسال الإطار: $e");
+    }
+  }
 
-  // 🔹 إيقاف التسجيل
-  final videoFile = await _cameraController!.stopVideoRecording();
-
-  // 🔹 نقل الفيديو إلى المسار الصحيح
-  final savedVideo = File(videoFile.path);
-  final newVideoPath = File(videoPath!);
-  savedVideo.renameSync(newVideoPath.path);
-
-  setState(() {
+  Future<void> stopRecording() async {
     isRecording = false;
-    videoPath = newVideoPath.path;
-  });
-
-  print("✅ تم حفظ الفيديو في: $videoPath");
-
-  // 🔹 حفظ الفيديو في المعرض باستخدام `gallery_saver_plus`
-  
-}
+    debugPrint("⏹️ تم إيقاف إرسال الإطارات.");
+  }
  Future<void> updateAchievements() async {
   final prefs = await SharedPreferences.getInstance();
-  String? email = prefs.getString('userEmail'); // استرجاع البريد الإلكتروني
+  String? email = prefs.getString('userEmail');
 
   if (email != null) {
     int completedExercises = prefs.getInt('${email}_completedExercises') ?? 0;
     double score = prefs.getDouble('${email}_score') ?? 0;
+    int totalExercises = prefs.getInt('${email}_totalExercises') ?? 5; // 🔹 تحميل عدد التمارين الديناميكي
 
     completedExercises++;
     score += 20;
 
     await prefs.setInt('${email}_completedExercises', completedExercises);
     await prefs.setDouble('${email}_score', score);
+    await prefs.setInt('${email}_totalExercises', totalExercises); // 🔹 حفظ العدد الجديد للتمارين
   }
 }
-
   void playCompletionSound() async {
     await player.play(AssetSource("audio/female-vocal-321-countdown-240912.mp3"));
   }
@@ -165,8 +151,8 @@ Future<void> stopRecording() async {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(widget.exerciseName, style: TextStyle(color: Colors.white, fontSize: 18)),
-            Text("$secondsRemaining ثانية", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(widget.exerciseName, style: const TextStyle(color: Colors.white, fontSize: 18)),
+            Text("$secondsRemaining ثانية", style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
           ],
         ),
       ),
@@ -184,19 +170,21 @@ Future<void> stopRecording() async {
                         child: CameraPreview(_cameraController!),
                       ),
                     )
-                  : Center(child: CircularProgressIndicator()),
+                  : const Center(child: CircularProgressIndicator()),
             ),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           IconButton(
             onPressed: () async {
               await stopRecording();
-              await updateAchievements();
-              Navigator.pop(context);
+                await updateAchievements();
+              if (mounted) {
+                Navigator.pop(context);
+              }
             },
-            icon: Icon(Icons.stop_circle, color: Colors.red, size: 80),
+            icon: const Icon(Icons.stop_circle, color: Colors.red, size: 80),
           ),
-          SizedBox(height: 32),
+          const SizedBox(height: 32),
         ],
       ),
     );
