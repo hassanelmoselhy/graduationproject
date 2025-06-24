@@ -88,7 +88,12 @@ class _UserProfilePageState extends State<UserProfilePage> {
             end: Alignment.bottomCenter,
           ),
         ),
-        child: Center(
+        child: SingleChildScrollView(
+        child: Center( 
+          child: ConstrainedBox(
+    constraints: BoxConstraints(
+      minHeight: MediaQuery.of(context).size.height,
+    ),
           child: Padding(
             padding: const EdgeInsets.all(20.0),
             child: Column(
@@ -161,7 +166,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
           ),
         ),
       ),
-    );
+    ) ,
+    ) , 
+    ) ;
   }
 
   Widget buildInfoTile({

@@ -1,4 +1,4 @@
-import 'package:finalpro/Time.dart';
+import 'package:finalpro/uploadvideo.dart';
 import 'package:flutter/material.dart'; 
 import 'package:font_awesome_flutter/font_awesome_flutter.dart'; 
 
@@ -15,10 +15,10 @@ final List<Map<String, dynamic>> exercises = [
   ]; 
 
 
-class ImageScreen extends StatelessWidget {
+class ImageScreen9 extends StatelessWidget {
   final int index;
 
-  ImageScreen({required this.index}); 
+  ImageScreen9({required this.index}); 
 
   @override
   Widget build(BuildContext context) {
@@ -35,9 +35,8 @@ class ImageScreen extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ExerciseTimerPage(
+              builder: (context) => UploadPage(
                 exerciseName: exercises[index]['name']!,
-                duration: exercises[index]['time'],
               ), 
             ),
           );
@@ -49,10 +48,10 @@ class ImageScreen extends StatelessWidget {
   }
 }
 
-class ImageScreen1 extends StatelessWidget { 
+class ImageScreen10 extends StatelessWidget { 
   final int index;
 
-  ImageScreen1({required this.index}); 
+  ImageScreen10({required this.index}); 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,9 +66,8 @@ class ImageScreen1 extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => ExerciseTimerPage(
+            MaterialPageRoute(builder: (context) => UploadPage(
                 exerciseName: exercises[index]['name']!,
-                duration: exercises[index]['time'],
               ),),
           );
         },
@@ -79,10 +77,10 @@ class ImageScreen1 extends StatelessWidget {
     );
   }
 }
-class ImageScreen2 extends StatelessWidget { 
+class ImageScreen11 extends StatelessWidget { 
   final int index;
 
-  ImageScreen2({required this.index}); 
+  ImageScreen11({required this.index}); 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -97,9 +95,8 @@ class ImageScreen2 extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => ExerciseTimerPage(
+            MaterialPageRoute(builder: (context) => UploadPage(
                 exerciseName: exercises[index]['name']!,
-                duration: exercises[index]['time'],
               ),),
           );
         },
@@ -109,10 +106,10 @@ class ImageScreen2 extends StatelessWidget {
     );
   }
 }
-class ImageScreen3 extends StatelessWidget {
+class ImageScreen12 extends StatelessWidget {
   final int index;
 
-  ImageScreen3({required this.index}); 
+  ImageScreen12({required this.index}); 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -127,9 +124,8 @@ class ImageScreen3 extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => ExerciseTimerPage(
+            MaterialPageRoute(builder: (context) => UploadPage(
                 exerciseName: exercises[index]['name']!,
-                duration: exercises[index]['time'],
               ),),
           );
         },
@@ -139,10 +135,10 @@ class ImageScreen3 extends StatelessWidget {
     );
   }
 }
-class ImageScreen4 extends StatelessWidget {
+class ImageScreen13 extends StatelessWidget {
   final int index;
 
-  ImageScreen4({required this.index}); 
+  ImageScreen13({required this.index}); 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -157,9 +153,8 @@ class ImageScreen4 extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => ExerciseTimerPage(
+            MaterialPageRoute(builder: (context) => UploadPage(
                 exerciseName: exercises[index]['name']!,
-                duration: exercises[index]['time'],
               ),),
           );
         },
@@ -169,10 +164,10 @@ class ImageScreen4 extends StatelessWidget {
     );
   }
 }
-class ImageScreen5 extends StatelessWidget {
+class ImageScreen14 extends StatelessWidget {
   final int index;
 
-  ImageScreen5({required this.index}); 
+  ImageScreen14({required this.index}); 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -187,9 +182,8 @@ class ImageScreen5 extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => ExerciseTimerPage(
+            MaterialPageRoute(builder: (context) => UploadPage(
                 exerciseName: exercises[index]['name']!,
-                duration: exercises[index]['time'],
               ),),
           );
         },
@@ -200,10 +194,10 @@ class ImageScreen5 extends StatelessWidget {
   }
 }
 
-class ImageScreen6 extends StatelessWidget {
+class ImageScreen15 extends StatelessWidget {
   final int index;
 
-  ImageScreen6({required this.index}); 
+  ImageScreen15({required this.index}); 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -218,9 +212,8 @@ class ImageScreen6 extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => ExerciseTimerPage(
+            MaterialPageRoute(builder: (context) => UploadPage(
                 exerciseName: exercises[index]['name']!,
-                duration: exercises[index]['time'],
               ),),
           );
         },
@@ -231,3 +224,4 @@ class ImageScreen6 extends StatelessWidget {
   }
 }
 
+ 

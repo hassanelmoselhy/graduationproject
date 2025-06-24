@@ -38,7 +38,16 @@ class _RegisterPageState extends State<RegisterPage> {
             'name': _nameController.text,
             'phone': _phoneController.text,
             'email': _emailController.text,
-          });
+          }); 
+            await firestore
+      .collection('users')
+      .doc(userCredential.user!.uid)
+      .collection('achievements')
+      .doc('fitness')
+      .set({
+    'score': 0,
+    'completedExercises': 0,
+  });
 
           // حفظ البريد الإلكتروني بعد التسجيل
           await _saveUserEmail(_emailController.text);
